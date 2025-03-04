@@ -5,3 +5,6 @@ venv
 !vullist.xlsx
 *.xlsx
 !vullist.xlsx
+exc.txt
+log.txt
+nochance.txt

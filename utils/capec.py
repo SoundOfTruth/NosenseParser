@@ -3,13 +3,19 @@ import requests
 from bs4 import BeautifulSoup
 
 
+def logging(response: requests.Response, cwe, url, filename):
+    log = f'{response.status_code} {cwe} {url}'
+    path = f'logs/{filename}'
+    with open(path, 'a') as file:
+        file.write(log + '\n')
+
+
 def get_capec(cwe: str) -> dict | None:
     try:
         capec_dict = {}
         id = cwe.split('-')[-1]
-        response = requests.get(
-            f'https://cwe.mitre.org/data/definitions/{id}.html'
-        )
+        url = f'https://cwe.mitre.org/data/definitions/{id}.html'
+        response = requests.get(url)
         soup = BeautifulSoup(response.text, 'html.parser')
         table = soup.find(attrs={'id': 'Related_Attack_Patterns'})
         table = table.find('table')
@@ -22,34 +28,37 @@ def get_capec(cwe: str) -> dict | None:
                 capec_id: table_data[1].text
             }
             capec_dict.update(payload)
+        logging(response, cwe, url, 'log.txt')
         return capec_dict
-    except Exception:
-        if response.status_code != 200:
-            print(response.status_code)
+    except AttributeError:
+        logging(response, cwe, url, 'nochance.txt')
+        return None
+    except Exception as ex:
+        with open('exc.txt', 'a') as file:
+            file.write(ex + '\n')
         return None
 
 
 def get_capec_chance(cwe: str) -> dict:
     try:
         id = cwe.split('-')[-1]
-        response = requests.get(
-            f'https://capec.mitre.org/data/definitions/{id}.html'
-        )
+        url = f'https://capec.mitre.org/data/definitions/{id}.html'
+        response = requests.get(url)
         soup = BeautifulSoup(response.text, 'html.parser')
         table = soup.find(attrs={'id': 'Likelihood_Of_Attack'})
         chance = table.find('p')
+        logging(response, cwe, url, 'log.txt')
         return {
             'chance': f'CAPEC {chance.text}',
             'value': id
         }
-    except Exception:
+    except AttributeError:
+        logging(response, cwe, url, 'nochance.txt')
         return {
                 'chance': 'No chance',
                 'value': id
             }
-
-
-if __name__ == '__main__':
-    data = get_capec('CWE-78')
-    capec_list = list(data['result']['dict'].keys())
-    print(capec_list)
+    except Exception as ex:
+        with open('exc.txt', 'a') as file:
+            file.write(ex + '\n')
+        return None
