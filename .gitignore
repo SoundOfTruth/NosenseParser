@@ -7,4 +7,5 @@ venv
 !vullist.xlsx
 exc.txt
 log.txt
-nochance.txt
+noChance.txt
+withChance.txt

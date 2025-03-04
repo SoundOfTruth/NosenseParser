@@ -28,10 +28,10 @@ def get_capec(cwe: str) -> dict | None:
                 capec_id: table_data[1].text
             }
             capec_dict.update(payload)
-        logging(response, cwe, url, 'log.txt')
+        logging(response, cwe, url, 'withChance.txt')
         return capec_dict
     except AttributeError:
-        logging(response, cwe, url, 'nochance.txt')
+        logging(response, cwe, url, 'noChance.txt')
         return None
     except Exception as ex:
         with open('exc.txt', 'a') as file:
@@ -47,13 +47,13 @@ def get_capec_chance(cwe: str) -> dict:
         soup = BeautifulSoup(response.text, 'html.parser')
         table = soup.find(attrs={'id': 'Likelihood_Of_Attack'})
         chance = table.find('p')
-        logging(response, cwe, url, 'log.txt')
+        logging(response, cwe, url, 'withChance.txt')
         return {
             'chance': f'CAPEC {chance.text}',
             'value': id
         }
     except AttributeError:
-        logging(response, cwe, url, 'nochance.txt')
+        logging(response, cwe, url, 'noChance.txt')
         return {
                 'chance': 'No chance',
                 'value': id
