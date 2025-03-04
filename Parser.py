@@ -21,30 +21,26 @@ class Parser:
 
     @time_of_function
     def __get_cwe(self):
-        try:
-            df = pd.read_excel('utils/vullist.xlsx')  # read data from xlsx file
-            for bdu in self.data:
-                cwe_list: list = get_cwe(df, bdu)
-                if cwe_list:
-                    dbu_payload = {
-                        'CWE': cwe_list,
-                    }
-                    self.data[bdu].update(dbu_payload)
-                    for cwe in cwe_list:
-                        self.cwe_set.add(cwe)  # get cwe unique values
-                    for obj in self.cwe_set:
-                        cwe_payload = {
-                            obj:
-                            {
-                                'CAPEC High': [],
-                                'CAPEC Medium': [],
-                                'CAPEC Low': [],
-                                'No chance': []
-                            }
-                        }
-                        self.cwe_capec.update(cwe_payload)
-        except Exception:
-            print(cwe_list)
+        df = pd.read_excel('utils/vullist.xlsx')  # read data from xlsx file
+        for bdu in self.data:
+            cwe_list: list = get_cwe(df, bdu)
+            dbu_payload = {
+                'CWE': cwe_list,
+            }
+            self.data[bdu].update(dbu_payload)
+            for cwe in cwe_list:
+                self.cwe_set.add(cwe)  # get cwe unique values
+        for obj in self.cwe_set:
+            cwe_payload = {
+                obj:
+                {
+                    'CAPEC High': [],
+                    'CAPEC Medium': [],
+                    'CAPEC Low': [],
+                    'No chance': []
+                }
+            }
+            self.cwe_capec.update(cwe_payload)
 
     @time_of_function
     def __get_cwe_capec(self):  # get cwe-capec dictionary
@@ -62,22 +58,23 @@ class Parser:
     @time_of_function
     def __group_data(self):
         for bdu in self.data:
-            cwe_list: list = self.data[bdu].get('cwe')
+            cwe_list: list = self.data[bdu].get('CWE')
+            ch_set = set()
+            cm_set = set()
+            cl_set = set()
+            nc_set = set()
             if cwe_list:
-                ch_set = set()
-                cm_set = set()
-                cl_set = set()
-                nc_set = set()
                 for cwe in cwe_list:
                     payload = self.cwe_capec[cwe]
                     ch_set.update(set(payload['CAPEC High']))
                     cm_set.update(set(payload['CAPEC Medium']))
                     cl_set.update(set(payload['CAPEC Low']))
                     nc_set.update(set(payload['No chance']))
-                self.data[bdu]['CAPEC High'] = list(ch_set)
-                self.data[bdu]['CAPEC Medium'] = list(cm_set)
-                self.data[bdu]['CAPEC Low'] = list(cl_set)
-                self.data[bdu]['No chance'] = list(nc_set)
+            self.data[bdu]['CAPEC High'] = list(ch_set)
+            self.data[bdu]['CAPEC Medium'] = list(cm_set)
+            self.data[bdu]['CAPEC Low'] = list(cl_set)
+            self.data[bdu]['No chance'] = list(nc_set)
+
 
     @time_of_function
     def __get_tables(self):
@@ -127,3 +124,9 @@ class Parser:
         self.__get_cwe_capec()
         self.__group_data()
         self.__get_tables()
+
+
+if __name__ == '__main__':
+    parser = Parser()
+    print('runned')
+    parser.start()

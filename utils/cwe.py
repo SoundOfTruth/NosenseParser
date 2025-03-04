@@ -9,9 +9,10 @@ def get_cwe(df: pandas.DataFrame, bdu: str) -> list:
         for _bdu in bdu_list:
             value = df.loc[df['Идентификатор'] == _bdu]
             cwe = value['Тип ошибки CWE'].values[0]
-            if not type(cwe) is float:
-                cwe_str = ''.join(cwe.split(', '))
-                cwe_set.add(cwe_str)
+            if type(cwe) is str:
+                cwe_list = cwe.split(', ')
+                for item in cwe_list:
+                    cwe_set.add(item)
         return list(cwe_set)
     except Exception as ex:
         print(ex)
@@ -20,6 +21,6 @@ def get_cwe(df: pandas.DataFrame, bdu: str) -> list:
 
 if __name__ == '__main__':
     df = pandas.read_excel('utils/vullist.xlsx')
-    cwe = get_cwe(df, 'BDU:2015-00227')
+    cwe = get_cwe(df, 'BDU:2017-01541')
     print(type(cwe))
     print(cwe)
